@@ -4,6 +4,7 @@ package cv.dynatrace.backend.controller;
 import cv.dynatrace.backend.dto.GetExchangeRateResponse;
 import cv.dynatrace.backend.dto.GetMaxAndMinRateResponse;
 import cv.dynatrace.backend.dto.GetMaxDifferenceResponse;
+import cv.dynatrace.backend.entity.Currency;
 import cv.dynatrace.backend.service.CurrencyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/currencies")
@@ -36,8 +38,8 @@ public class CurrencyController {
     public ResponseEntity<GetExchangeRateResponse> getDateExchangeRate(@PathVariable("currencyCode") String currencyCode,
                                                                @PathVariable("date") LocalDate date
                                                                ){
-
-
+        Optional<Currency> result = currencyService.getExchangeRate(currencyCode, date);
+        return null;
     }
 
     /**
@@ -51,6 +53,7 @@ public class CurrencyController {
     public ResponseEntity<GetMaxAndMinRateResponse> getMaxAndMinRate(@PathVariable("currencyCode") String currencyCode,
                                                                      @PathVariable("numberOfQuotations") int numberOfQuotations){
 
+        return null;
     }
 
     /**
@@ -63,6 +66,6 @@ public class CurrencyController {
     @GetMapping("{currencyCode}/maxDifference/{numberOfQuotations}")
     public ResponseEntity<GetMaxDifferenceResponse> getMaxDifference(@PathVariable("currencyCode") String currencyCode,
                                                                      @PathVariable("numberOfQuotations") int numberOfQuotations){
-
+        return null;
     }
 }
