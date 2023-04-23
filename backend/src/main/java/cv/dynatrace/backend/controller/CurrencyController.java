@@ -64,6 +64,9 @@ public class CurrencyController {
     @GetMapping("{currencyCode}/minAndMax/{numberOfQuotations}")
     public ResponseEntity<GetMaxAndMinRateResponse> getMaxAndMinRate(@PathVariable("currencyCode") String currencyCode,
                                                                      @PathVariable("numberOfQuotations") int numberOfQuotations){
+        Optional<Currency> result = currencyService.getMinAndMaxExchangeRates(currencyCode, numberOfQuotations);
+
+        System.out.println(result.get());
 
         return null;
     }

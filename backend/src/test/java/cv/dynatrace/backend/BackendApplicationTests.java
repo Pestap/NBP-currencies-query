@@ -4,6 +4,7 @@ import cv.dynatrace.backend.controller.CurrencyController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 
@@ -23,6 +24,11 @@ class BackendApplicationTests {
     @Test
     void testCurrency(){
         currencyController.getDateExchangeRate("eur","2023-04-21");
+    }
+
+    @Test
+    void testGetMaxAndMinExchangeRates(){
+        currencyController.getMaxAndMinRate("eur", 10);
     }
 
 }
