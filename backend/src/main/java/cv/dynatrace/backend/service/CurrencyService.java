@@ -69,4 +69,8 @@ public class CurrencyService {
         }
     }
 
+    public Optional<Currency> getMinAndMaxExchangeRates(String currencyCode, int numberOfQuotations){
+        return Optional.empty();
+    }
+
 }

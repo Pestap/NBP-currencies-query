@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
 @RestController
@@ -31,15 +33,25 @@ public class CurrencyController {
      * Task 1
      * A method for returning a currencies exchange rate at a given date
      * @param currencyCode - code of the currency (ISO 4217)
-     * @param date - date, from which the exchange date should be provided, format: YYYY-MM-DD
+     * @param dateString - date, from which the exchange date should be provided, format: YYYY-MM-DD
      * @return - returns a response entity with the desired data
      */
     @GetMapping("{currencyCode}/{date}")
     public ResponseEntity<GetExchangeRateResponse> getDateExchangeRate(@PathVariable("currencyCode") String currencyCode,
-                                                               @PathVariable("date") LocalDate date
-                                                               ){
-        Optional<Currency> result = currencyService.getExchangeRate(currencyCode, date);
-        return null;
+                                                               @PathVariable("date") String dateString){
+
+        // check if date valid, no need to check the code - if wrong NBP will return 404 not found which is handled in service
+        try{
+            LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE);
+            Optional<Currency> result = currencyService.getExchangeRate(currencyCode, date);
+            // returns a result or 404 not found
+            return result
+                    .map(currency -> ResponseEntity.ok(GetExchangeRateResponse.entityToDtoMapper().apply(currency)))
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        }catch (DateTimeParseException ex){
+            // return a 400 bad request if date is not valid
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**

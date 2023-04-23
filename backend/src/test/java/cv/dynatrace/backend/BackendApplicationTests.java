@@ -22,7 +22,7 @@ class BackendApplicationTests {
     }
     @Test
     void testCurrency(){
-        currencyController.getDateExchangeRate("eur", LocalDate.parse("2023-04-21"));
+        currencyController.getDateExchangeRate("eur","2023-04-21");
     }
 
 }

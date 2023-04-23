@@ -7,13 +7,15 @@ import lombok.*;
 @Setter
 @ToString
 @EqualsAndHashCode
+@AllArgsConstructor
 public class Currency
 {
     private String code;
     private double exchangeRate;
 
-    public Currency(String code, double exchangeRate){
-        this.code = code;
-        this.exchangeRate = exchangeRate;
-    }
+    private double min;
+    private double max;
+    private double majorDifference;
+
+
 }
