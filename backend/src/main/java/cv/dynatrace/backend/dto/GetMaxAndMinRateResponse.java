@@ -12,11 +12,13 @@ import java.util.function.Function;
 @ToString
 @EqualsAndHashCode
 public class GetMaxAndMinRateResponse {
+    private String code;
     private double maxValue;
     private double minValue;
 
     public static Function<Currency, GetMaxAndMinRateResponse> entityToDtoMapper(){
         return currency -> GetMaxAndMinRateResponse.builder()
+                .code(currency.getCode())
                 .maxValue(currency.getMax())
                 .minValue(currency.getMin())
                 .build();

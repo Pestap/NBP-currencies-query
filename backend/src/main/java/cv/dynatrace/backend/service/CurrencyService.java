@@ -30,15 +30,9 @@ public class CurrencyService {
     public Optional<Currency> getExchangeRate(String currencyCode, LocalDate date){
         try {
 
-            // create request
             String url = String.format("%s/a/%s/%s", nbpApiAddress, currencyCode, date.toString());
-            System.out.println(url);
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).header("accept", "application/json").build();
 
-
-            // send request
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = CurrencyService.sendRequest(url);
             int statusCode = response.statusCode();
             String responseBody = response.body();
 
@@ -64,7 +58,7 @@ public class CurrencyService {
             }
 
 
-        } catch (IOException | InterruptedException |ParseException e) {
+        } catch (ParseException | IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
@@ -74,12 +68,10 @@ public class CurrencyService {
 
             // create request
             String url = String.format("%s/a/%s/last/%d", nbpApiAddress, currencyCode, numberOfQuotations);
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).header("accept", "application/json").build();
 
 
             // send request
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = CurrencyService.sendRequest(url);
             int statusCode = response.statusCode();
             String responseBody = response.body();
 
@@ -129,16 +121,65 @@ public class CurrencyService {
     }
 
 
-    public static HttpResponse<String> sendRequest(String url){
+    public Optional<Currency> getMaxDifference(String currencyCode, int numberOfQuotations) {
+
         try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).header("accept", "application/json").build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response;
-        } catch (IOException | InterruptedException e) {
+            String url = String.format("%s/c/%s/last/%d", nbpApiAddress, currencyCode, numberOfQuotations);
+
+
+            // send request
+            HttpResponse<String> response = CurrencyService.sendRequest(url);
+            int statusCode = response.statusCode();
+            String responseBody = response.body();
+
+            if(statusCode == 200){
+                // parse the json object
+                JSONParser jp = new JSONParser();
+                JSONObject jo = (JSONObject)jp.parse(responseBody);
+
+                // parse rates array
+                JSONArray rates = (JSONArray)jo.get("rates");
+                //JSONObject rate = (JSONObject)rates.get(0);
+                //double exchangeRate = (Double)rate.get("mid");
+
+                JSONObject firtObject = (JSONObject)rates.get(0);
+
+                double maxDifference = Math.abs((Double)firtObject.get("bid") - (Double)firtObject.get("ask"));
+
+                for(int i =0; i <rates.size(); i++){
+                    JSONObject singleRate = (JSONObject)rates.get(i);
+                    double singleRateDifference = Math.abs((Double)singleRate.get("bid") - (Double)singleRate.get("ask"));
+                    System.out.println(singleRateDifference);
+
+                    if(singleRateDifference > maxDifference){
+                        maxDifference = singleRateDifference;
+                    }
+
+
+                }
+
+
+                // return the result
+                return Optional.of(
+                        Currency.builder().code(currencyCode).majorDifference(maxDifference).build()
+                );
+            }else{
+                // in case of any errors return an empty optional
+                return Optional.empty();
+            }
+
+        } catch (IOException | InterruptedException | ParseException e) {
             throw new RuntimeException(e);
         }
 
+
+    }
+
+    public static HttpResponse<String> sendRequest(String url) throws IOException, InterruptedException {
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder(URI.create(url)).header("accept", "application/json").build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return response;
     }
 
 }

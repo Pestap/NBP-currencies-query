@@ -48,7 +48,7 @@ public class CurrencyController {
             return result
                     .map(currency -> ResponseEntity.ok(GetExchangeRateResponse.entityToDtoMapper().apply(currency)))
                     .orElseGet(() -> ResponseEntity.notFound().build());
-        }catch (DateTimeParseException ex){
+        }catch (RuntimeException ex){
             // return a 400 bad request if date is not valid
             return ResponseEntity.badRequest().build();
         }
@@ -76,7 +76,7 @@ public class CurrencyController {
             return result
                     .map(currency -> ResponseEntity.ok(GetMaxAndMinRateResponse.entityToDtoMapper().apply(currency)))
                     .orElseGet(() -> ResponseEntity.notFound().build());
-        }catch(NumberFormatException ex){
+        }catch(RuntimeException ex){
             return ResponseEntity.badRequest().build();
         }
     }
@@ -85,12 +85,26 @@ public class CurrencyController {
      * Task 3
      * A method for returning the max difference between buy and sell rates of a given currency from a specified number of last quotations
      * @param currencyCode - of the currency (ISO 4217)
-     * @param numberOfQuotations - last number of quotations from which the max and min values should be extracted (<= 255)
+     * @param numberOfQuotationsString - last number of quotations from which the max and min values should be extracted (<= 255)
      * @return - response entity with desired data
      */
     @GetMapping("{currencyCode}/maxDifference/{numberOfQuotations}")
     public ResponseEntity<GetMaxDifferenceResponse> getMaxDifference(@PathVariable("currencyCode") String currencyCode,
-                                                                     @PathVariable("numberOfQuotations") int numberOfQuotations){
-        return null;
+                                                                     @PathVariable("numberOfQuotations") String numberOfQuotationsString){
+
+        // check numberOfQuotations validity
+        try{
+            int numberOfQuotations = Integer.parseInt(numberOfQuotationsString);
+
+            if(numberOfQuotations > 255 || numberOfQuotations <= 0){
+                throw new NumberFormatException("Number of quotations out of range");
+            }
+            Optional<Currency> result = currencyService.getMaxDifference(currencyCode, numberOfQuotations);
+            return result
+                    .map(currency -> ResponseEntity.ok(GetMaxDifferenceResponse.entityToDtoMapper().apply(currency)))
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        }catch(RuntimeException ex){
+            return ResponseEntity.badRequest().build();
+        }
     }
 }
