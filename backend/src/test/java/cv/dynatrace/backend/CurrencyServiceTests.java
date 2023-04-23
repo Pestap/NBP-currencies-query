@@ -1,6 +1,5 @@
 package cv.dynatrace.backend;
 
-import cv.dynatrace.backend.controller.CurrencyController;
 import cv.dynatrace.backend.entity.CurrencyExchangeRate;
 import cv.dynatrace.backend.entity.CurrencyMajorBuySellDifference;
 import cv.dynatrace.backend.entity.CurrencyMinMaxRate;
@@ -19,16 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest
-class BackendApplicationTests {
+class CurrencyServiceTests {
 
-    @Autowired
-    private CurrencyController currencyController;
     @Autowired
     private CurrencyService currencyService;
 
     @Test
     void contextLoads() {
-        assertThat(currencyController).isNotNull();
+        assertThat(currencyService).isNotNull();
     }
 
     // exchange rates
