@@ -27,6 +27,12 @@ public class CurrencyService {
 
     }
 
+    /**
+     * Method for getting the exchange rate of the desired currency from desired day
+     * @param currencyCode - the ISO currency code (ISO 4217)
+     * @param date - the date
+     * @return - The currency object representing fetched data
+     */
     public Optional<Currency> getExchangeRate(String currencyCode, LocalDate date){
         try {
 
@@ -63,6 +69,12 @@ public class CurrencyService {
         }
     }
 
+    /**
+     * The method for getting the min and max exchange rates from given last n numberOfQuotations
+     * @param currencyCode - the ISO currency code (ISO 4217)
+     * @param numberOfQuotations - the number of last quotations taken into consideration
+     * @return - The currency object representing fetched data
+     */
     public Optional<Currency> getMinAndMaxExchangeRates(String currencyCode, int numberOfQuotations){
         try {
 
@@ -84,8 +96,6 @@ public class CurrencyService {
 
                 // parse rates array
                 JSONArray rates = (JSONArray)jo.get("rates");
-                //JSONObject rate = (JSONObject)rates.get(0);
-                //double exchangeRate = (Double)rate.get("mid");
 
                 double minValue = (Double)((JSONObject)rates.get(0)).get("mid");
                 double maxValue = (Double)((JSONObject)rates.get(0)).get("mid");
@@ -120,7 +130,12 @@ public class CurrencyService {
         }
     }
 
-
+    /**
+     * The method for getting the major difference between buy and sell price from last numberOfQuotations
+     * @param currencyCode - the ISO currency code (ISO 4217)
+     * @param numberOfQuotations - the number of last quotations taken into consideration
+     * @return - The currency object representing fetched data
+     */
     public Optional<Currency> getMaxDifference(String currencyCode, int numberOfQuotations) {
 
         try {
@@ -175,6 +190,13 @@ public class CurrencyService {
 
     }
 
+    /**
+     * A method for sending a request to specified url
+     * @param url - the url
+     * @return - HttpResponses object with web server response
+     * @throws IOException
+     * @throws InterruptedException - exceptions are thrown when connection fails
+     */
     public static HttpResponse<String> sendRequest(String url) throws IOException, InterruptedException {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder(URI.create(url)).header("accept", "application/json").build();
