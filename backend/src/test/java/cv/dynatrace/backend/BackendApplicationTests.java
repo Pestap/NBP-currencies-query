@@ -28,7 +28,7 @@ class BackendApplicationTests {
 
     @Test
     void testGetMaxAndMinExchangeRates(){
-        currencyController.getMaxAndMinRate("eur", 10);
+        currencyController.getMaxAndMinRate("eur", "10");
     }
 
 }

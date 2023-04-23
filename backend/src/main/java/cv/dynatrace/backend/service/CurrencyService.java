@@ -74,7 +74,6 @@ public class CurrencyService {
 
             // create request
             String url = String.format("%s/a/%s/last/%d", nbpApiAddress, currencyCode, numberOfQuotations);
-            System.out.println(url);
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder(URI.create(url)).header("accept", "application/json").build();
 
@@ -127,6 +126,19 @@ public class CurrencyService {
         } catch (IOException | InterruptedException |ParseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    public static HttpResponse<String> sendRequest(String url){
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).header("accept", "application/json").build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response;
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 }

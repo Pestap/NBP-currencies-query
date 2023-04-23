@@ -58,17 +58,27 @@ public class CurrencyController {
      * Task 2
      * A method for returning the min and max exchange rate of a given currency from a specified number of last quotations
      * @param currencyCode - code of the currency (ISO 4217)
-     * @param numberOfQuotations - last number of quotations from which the max and min values should be extracted (<= 255)
+     * @param numberOfQuotationsString - last number of quotations from which the max and min values should be extracted (<= 255)
      * @return - response entity with desired data
      */
     @GetMapping("{currencyCode}/minAndMax/{numberOfQuotations}")
     public ResponseEntity<GetMaxAndMinRateResponse> getMaxAndMinRate(@PathVariable("currencyCode") String currencyCode,
-                                                                     @PathVariable("numberOfQuotations") int numberOfQuotations){
-        Optional<Currency> result = currencyService.getMinAndMaxExchangeRates(currencyCode, numberOfQuotations);
+                                                                     @PathVariable("numberOfQuotations") String numberOfQuotationsString){
 
-        System.out.println(result.get());
+        // check numberOfQuotations validity
+        try{
+            int numberOfQuotations = Integer.parseInt(numberOfQuotationsString);
 
-        return null;
+            if(numberOfQuotations > 255 || numberOfQuotations <= 0){
+                throw new NumberFormatException("Number of quotations out of range");
+            }
+            Optional<Currency> result = currencyService.getMinAndMaxExchangeRates(currencyCode, numberOfQuotations);
+            return result
+                    .map(currency -> ResponseEntity.ok(GetMaxAndMinRateResponse.entityToDtoMapper().apply(currency)))
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        }catch(NumberFormatException ex){
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**
