@@ -72,11 +72,15 @@ public class CurrencyController {
             if(numberOfQuotations > 255 || numberOfQuotations <= 0){
                 throw new NumberFormatException("Number of quotations out of range");
             }
+            // call the service method that calculates the min and max rates
             Optional<CurrencyMinMaxRate> result = currencyService.getMinAndMaxExchangeRates(currencyCode, numberOfQuotations);
+
+            // return appropriate dto object or notFound entity according to the resul (if empty or not)
             return result
                     .map(currency -> ResponseEntity.ok(GetMaxAndMinRateResponse.entityToDtoMapper().apply(currency)))
                     .orElseGet(() -> ResponseEntity.notFound().build());
         }catch(RuntimeException ex){
+            // in case of any errors - return a BadRequest response
             return ResponseEntity.badRequest().build();
         }
     }
@@ -95,15 +99,18 @@ public class CurrencyController {
         // check numberOfQuotations validity
         try{
             int numberOfQuotations = Integer.parseInt(numberOfQuotationsString);
-
+            // check if the number is in range specified in the instructions
             if(numberOfQuotations > 255 || numberOfQuotations <= 0){
                 throw new NumberFormatException("Number of quotations out of range");
             }
+            // call service method that calculates the biggest difference
             Optional<CurrencyMajorBuySellDifference> result = currencyService.getMaxDifference(currencyCode, numberOfQuotations);
+            // return an approperiate DTO if request was valid or notFound if not
             return result
                     .map(currency -> ResponseEntity.ok(GetMaxDifferenceResponse.entityToDtoMapper().apply(currency)))
                     .orElseGet(() -> ResponseEntity.notFound().build());
         }catch(RuntimeException ex){
+            // in case of any errors  return a BadRequest Response
             return ResponseEntity.badRequest().build();
         }
     }

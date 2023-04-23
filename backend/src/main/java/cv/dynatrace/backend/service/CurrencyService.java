@@ -19,7 +19,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -27,9 +26,7 @@ import java.util.Optional;
 public class CurrencyService {
     private static final String nbpApiAddress = "http://api.nbp.pl/api/exchangerates/rates";
     @Autowired
-    public CurrencyService(){
-
-    }
+    public CurrencyService(){}
 
     /**
      * Method for getting the exchange rate of the desired currency from desired day
@@ -39,22 +36,26 @@ public class CurrencyService {
      */
     public Optional<CurrencyExchangeRate> getExchangeRate(String currencyCode, LocalDate date){
         try {
-
+            // construct the url
             String url = String.format("%s/a/%s/%s", nbpApiAddress, currencyCode, date.toString());
 
+            // send the request
             HttpResponse<String> response = CurrencyService.sendRequest(url);
+
+            // get status code and body
             int statusCode = response.statusCode();
             String responseBody = response.body();
 
 
             // return based on response code
-            if(statusCode == 200){
+            if(statusCode == 200){ // if OK
                 // parse the json object
-                JSONParser jp = new JSONParser();
-                JSONObject jo = (JSONObject)jp.parse(responseBody);
+                JSONParser parser = new JSONParser();
+                JSONObject responseJSONObject = (JSONObject)parser.parse(responseBody);
 
                 // parse rates array and get the desired rate (first one)
-                JSONArray rates = (JSONArray)jo.get("rates");
+                JSONArray rates = (JSONArray)responseJSONObject.get("rates");
+
                 JSONObject rate = (JSONObject)rates.get(0);
                 double exchangeRate = (Double)rate.get("mid");
 
@@ -88,6 +89,8 @@ public class CurrencyService {
 
             // send request
             HttpResponse<String> response = CurrencyService.sendRequest(url);
+
+            // get status code and body
             int statusCode = response.statusCode();
             String responseBody = response.body();
 
@@ -95,11 +98,11 @@ public class CurrencyService {
             // return based on response code
             if(statusCode == 200){
                 // parse the json object
-                JSONParser jp = new JSONParser();
-                JSONObject jo = (JSONObject)jp.parse(responseBody);
+                JSONParser parser = new JSONParser();
+                JSONObject responseJSONObject = (JSONObject)parser.parse(responseBody);
 
                 // parse rates array
-                JSONArray rates = (JSONArray)jo.get("rates");
+                JSONArray rates = (JSONArray)responseJSONObject.get("rates");
 
                 double minValue = (Double)((JSONObject)rates.get(0)).get("mid");
                 LocalDate minDate = LocalDate.parse((String)((JSONObject)rates.get(0)).get("effectiveDate"));
@@ -112,7 +115,7 @@ public class CurrencyService {
                     JSONObject singleRate = (JSONObject)rates.get(i);
                     double singleRateValue = (Double)singleRate.get("mid");
 
-                    // compare and replace the min and max values if necessary
+                    // compare and replace the min and max values (and quotation dates) if necessary
                     if(singleRateValue < minValue){
                         minValue = singleRateValue;
                         minDate = LocalDate.parse((String)singleRate.get("effectiveDate"));
@@ -156,6 +159,8 @@ public class CurrencyService {
     public Optional<CurrencyMajorBuySellDifference> getMaxDifference(String currencyCode, int numberOfQuotations) {
 
         try {
+
+            // construct the url
             String url = String.format("%s/c/%s/last/%d", nbpApiAddress, currencyCode, numberOfQuotations);
 
 
@@ -166,25 +171,28 @@ public class CurrencyService {
 
             if(statusCode == 200){
                 // parse the json object
-                JSONParser jp = new JSONParser();
-                JSONObject jo = (JSONObject)jp.parse(responseBody);
+                JSONParser parser = new JSONParser();
+                JSONObject responseJSONObject = (JSONObject)parser.parse(responseBody);
 
                 // parse rates array
-                JSONArray rates = (JSONArray)jo.get("rates");
-                //JSONObject rate = (JSONObject)rates.get(0);
-                //double exchangeRate = (Double)rate.get("mid");
+                JSONArray rates = (JSONArray)responseJSONObject.get("rates");
 
-                JSONObject firtObject = (JSONObject)rates.get(0);
+                // set inital values for comparing
+                JSONObject firstObject = (JSONObject)rates.get(0);
 
-                double maxDifference = Math.abs((Double)firtObject.get("bid") - (Double)firtObject.get("ask"));
+                double maxDifference = Math.abs((Double)firstObject.get("bid") - (Double)firstObject.get("ask"));
 
-                LocalDate maxDifferenceDate = LocalDate.parse((String)firtObject.get("effectiveDate"));
+                LocalDate maxDifferenceDate = LocalDate.parse((String)firstObject.get("effectiveDate"));
 
 
                 for(int i =0; i <rates.size(); i++){
+                    // get the i-th quotation
                     JSONObject singleRate = (JSONObject)rates.get(i);
+
+                    // calculate the difference
                     double singleRateDifference = Math.abs((Double)singleRate.get("bid") - (Double)singleRate.get("ask"));
 
+                    // compare and replace if necessary
                     if(singleRateDifference > maxDifference){
                         maxDifference = singleRateDifference;
                         maxDifferenceDate = LocalDate.parse((String)singleRate.get("effectiveDate"));

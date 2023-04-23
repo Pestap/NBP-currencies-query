@@ -18,7 +18,7 @@ public class GetMaxDifferenceResponse
     private LocalDate quotationDate;
 
     /**
-     * a method that returns a function that maps an object of currency class to appropriate DTO object
+     * a method that returns a function that maps an object of CurrencyMajorBuySellDifference class to appropriate DTO object
      * @return - the mapping function
      */
 
