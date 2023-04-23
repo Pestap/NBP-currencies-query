@@ -1,7 +1,10 @@
 package cv.dynatrace.backend.service;
 
-import cv.dynatrace.backend.entity.Currency;
 
+import cv.dynatrace.backend.entity.CurrencyExchangeRate;
+import cv.dynatrace.backend.entity.CurrencyMajorBuySellDifference;
+import cv.dynatrace.backend.entity.CurrencyMinMaxRate;
+import org.decimal4j.util.DoubleRounder;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -16,6 +19,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -33,7 +37,7 @@ public class CurrencyService {
      * @param date - the date
      * @return - The currency object representing fetched data
      */
-    public Optional<Currency> getExchangeRate(String currencyCode, LocalDate date){
+    public Optional<CurrencyExchangeRate> getExchangeRate(String currencyCode, LocalDate date){
         try {
 
             String url = String.format("%s/a/%s/%s", nbpApiAddress, currencyCode, date.toString());
@@ -56,7 +60,7 @@ public class CurrencyService {
 
                 // return the result
                 return Optional.of(
-                        Currency.builder().code(currencyCode).exchangeRate(exchangeRate).build()
+                        CurrencyExchangeRate.builder().code(currencyCode).exchangeRate(exchangeRate).quotationDate(date).build()
                 );
             }else{
                 // in case of any errors return an empty optional
@@ -75,7 +79,7 @@ public class CurrencyService {
      * @param numberOfQuotations - the number of last quotations taken into consideration
      * @return - The currency object representing fetched data
      */
-    public Optional<Currency> getMinAndMaxExchangeRates(String currencyCode, int numberOfQuotations){
+    public Optional<CurrencyMinMaxRate> getMinAndMaxExchangeRates(String currencyCode, int numberOfQuotations){
         try {
 
             // create request
@@ -98,18 +102,25 @@ public class CurrencyService {
                 JSONArray rates = (JSONArray)jo.get("rates");
 
                 double minValue = (Double)((JSONObject)rates.get(0)).get("mid");
+                LocalDate minDate = LocalDate.parse((String)((JSONObject)rates.get(0)).get("effectiveDate"));
                 double maxValue = (Double)((JSONObject)rates.get(0)).get("mid");
+                LocalDate maxDate = LocalDate.parse((String)((JSONObject)rates.get(0)).get("effectiveDate"));
 
+                // iterate through rates list
                 for(int i =0; i <rates.size(); i++){
+                    // get i-th object on list
                     JSONObject singleRate = (JSONObject)rates.get(i);
                     double singleRateValue = (Double)singleRate.get("mid");
 
+                    // compare and replace the min and max values if necessary
                     if(singleRateValue < minValue){
                         minValue = singleRateValue;
+                        minDate = LocalDate.parse((String)singleRate.get("effectiveDate"));
                     }
 
                     if(singleRateValue > maxValue){
                         maxValue = singleRateValue;
+                        maxDate = LocalDate.parse((String)singleRate.get("effectiveDate"));
                     }
 
                 }
@@ -117,7 +128,13 @@ public class CurrencyService {
 
                 // return the result
                 return Optional.of(
-                        Currency.builder().code(currencyCode).max(maxValue).min(minValue).build()
+                        CurrencyMinMaxRate.builder()
+                                .code(currencyCode)
+                                .max(maxValue)
+                                .maxDate(maxDate)
+                                .min(minValue)
+                                .minDate(minDate)
+                                .build()
                 );
             }else{
                 // in case of any errors return an empty optional
@@ -136,7 +153,7 @@ public class CurrencyService {
      * @param numberOfQuotations - the number of last quotations taken into consideration
      * @return - The currency object representing fetched data
      */
-    public Optional<Currency> getMaxDifference(String currencyCode, int numberOfQuotations) {
+    public Optional<CurrencyMajorBuySellDifference> getMaxDifference(String currencyCode, int numberOfQuotations) {
 
         try {
             String url = String.format("%s/c/%s/last/%d", nbpApiAddress, currencyCode, numberOfQuotations);
@@ -161,22 +178,31 @@ public class CurrencyService {
 
                 double maxDifference = Math.abs((Double)firtObject.get("bid") - (Double)firtObject.get("ask"));
 
+                LocalDate maxDifferenceDate = LocalDate.parse((String)firtObject.get("effectiveDate"));
+
+
                 for(int i =0; i <rates.size(); i++){
                     JSONObject singleRate = (JSONObject)rates.get(i);
                     double singleRateDifference = Math.abs((Double)singleRate.get("bid") - (Double)singleRate.get("ask"));
-                    System.out.println(singleRateDifference);
 
                     if(singleRateDifference > maxDifference){
                         maxDifference = singleRateDifference;
+                        maxDifferenceDate = LocalDate.parse((String)singleRate.get("effectiveDate"));
                     }
 
 
                 }
 
+                // round the value to 4 decimal places (as in NBP api)
+                double roundedMaxDifference = DoubleRounder.round(maxDifference, 4);
 
                 // return the result
                 return Optional.of(
-                        Currency.builder().code(currencyCode).majorDifference(maxDifference).build()
+                        CurrencyMajorBuySellDifference.builder()
+                                .code(currencyCode)
+                                .majorDifference(Double.valueOf(roundedMaxDifference))
+                                .quotationDate(maxDifferenceDate)
+                                .build()
                 );
             }else{
                 // in case of any errors return an empty optional

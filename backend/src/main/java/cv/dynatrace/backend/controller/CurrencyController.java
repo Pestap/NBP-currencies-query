@@ -4,7 +4,9 @@ package cv.dynatrace.backend.controller;
 import cv.dynatrace.backend.dto.GetExchangeRateResponse;
 import cv.dynatrace.backend.dto.GetMaxAndMinRateResponse;
 import cv.dynatrace.backend.dto.GetMaxDifferenceResponse;
-import cv.dynatrace.backend.entity.Currency;
+import cv.dynatrace.backend.entity.CurrencyExchangeRate;
+import cv.dynatrace.backend.entity.CurrencyMajorBuySellDifference;
+import cv.dynatrace.backend.entity.CurrencyMinMaxRate;
 import cv.dynatrace.backend.service.CurrencyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +43,7 @@ public class CurrencyController {
         // check if date valid, no need to check the code - if wrong NBP will return 404 not found which is handled in service
         try{
             LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE);
-            Optional<Currency> result = currencyService.getExchangeRate(currencyCode, date);
+            Optional<CurrencyExchangeRate> result = currencyService.getExchangeRate(currencyCode, date);
             // returns a result or 404 not found
             return result
                     .map(currency -> ResponseEntity.ok(GetExchangeRateResponse.entityToDtoMapper().apply(currency)))
@@ -70,7 +72,7 @@ public class CurrencyController {
             if(numberOfQuotations > 255 || numberOfQuotations <= 0){
                 throw new NumberFormatException("Number of quotations out of range");
             }
-            Optional<Currency> result = currencyService.getMinAndMaxExchangeRates(currencyCode, numberOfQuotations);
+            Optional<CurrencyMinMaxRate> result = currencyService.getMinAndMaxExchangeRates(currencyCode, numberOfQuotations);
             return result
                     .map(currency -> ResponseEntity.ok(GetMaxAndMinRateResponse.entityToDtoMapper().apply(currency)))
                     .orElseGet(() -> ResponseEntity.notFound().build());
@@ -97,7 +99,7 @@ public class CurrencyController {
             if(numberOfQuotations > 255 || numberOfQuotations <= 0){
                 throw new NumberFormatException("Number of quotations out of range");
             }
-            Optional<Currency> result = currencyService.getMaxDifference(currencyCode, numberOfQuotations);
+            Optional<CurrencyMajorBuySellDifference> result = currencyService.getMaxDifference(currencyCode, numberOfQuotations);
             return result
                     .map(currency -> ResponseEntity.ok(GetMaxDifferenceResponse.entityToDtoMapper().apply(currency)))
                     .orElseGet(() -> ResponseEntity.notFound().build());
