@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>NBP Currency Queries</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+	<script src="script.js"></script>
+        <div id="mainDiv">
+            <div id="exchangeRateDiv">
+                <h3>Task 1 - average exchange rate from a given date</h3>
+                <form class ="exchangeRateForm">
+                    <label for="currencyCode" >Currency:</label>
+                    <input type="text" name ="currencyCode" id ='currencyCode_exchangeRateForm'required>
+                    <label for="quotationDate">Quotation Date:</label>
+                    <input type="date" name ="quotationDate" id='quotationDate_exchangeRateForm' required>
+                    <input type="submit" id="getExchangeRateButton">
+                </form>
+            </div>
+            <div id="minMaxExchangeRateDiv">
+                <h3>Task 2 - minimum and maximum average exchange rate from last N quotations</h3>
+                <form class ="minMaxExchangeRateForm">
+                    <label for="currencyCode" >Currency:</label>
+                    <input type="text" name ="currencyCode" id ='currencyCode_minMaxExchangeRateForm'required>
+                    <label for="quotationNumber">Number of last quotations:</label>
+                    <input type="number" min="1" max="255" name ="quotationNumber" id='quotationDate_minMaxExchangeRateForm' required>
+                    <input type="submit" id="getMinMaxExchangeRateButton">
+                </form>
+            </div>
+            <div id="majorDifferenceDiv">
+                <h3>Task 3 - the biggest difference between buy and sell price from last N quotations</h3>
+                <form class ="majorDifferenceForm">
+                    <label for="currencyCode" >Currency:</label>
+                    <input type="text" name ="currencyCode" id ='currencyCode_majorDifferenceForm'required>
+                    <label for="quotationDate">Number of last quotations:</label>
+                    <input type="number" min="1" max="255" name ="quotationNumber" id='quotationNumber_majorDifferenceForm' required>
+                    <input type="submit" id="getMajorDifferenceButton">
+                </form>
+            </div>
+        </div>
+    
+  </body>
+</html>
