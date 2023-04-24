@@ -46,27 +46,25 @@ public class CurrencyService {
             int statusCode = response.statusCode();
             String responseBody = response.body();
 
-
-            // return based on response code
-            if(statusCode == 200){ // if OK
-                // parse the json object
-                JSONParser parser = new JSONParser();
-                JSONObject responseJSONObject = (JSONObject)parser.parse(responseBody);
-
-                // parse rates array and get the desired rate (first one)
-                JSONArray rates = (JSONArray)responseJSONObject.get("rates");
-
-                JSONObject rate = (JSONObject)rates.get(0);
-                double exchangeRate = (Double)rate.get("mid");
-
-                // return the result
-                return Optional.of(
-                        CurrencyExchangeRate.builder().code(currencyCode).exchangeRate(exchangeRate).quotationDate(date).build()
-                );
-            }else{
-                // in case of any errors return an empty optional
+            // if status code is different than 200, return empty optional
+            if(statusCode != 200){
                 return Optional.empty();
             }
+            // if response code 200
+            // parse the json object
+            JSONParser parser = new JSONParser();
+            JSONObject responseJSONObject = (JSONObject)parser.parse(responseBody);
+
+            // parse rates array and get the desired rate (first one)
+            JSONArray rates = (JSONArray)responseJSONObject.get("rates");
+
+            JSONObject rate = (JSONObject)rates.get(0);
+            double exchangeRate = (Double)rate.get("mid");
+
+            // return the result
+            return Optional.of(
+                    CurrencyExchangeRate.builder().code(currencyCode).exchangeRate(exchangeRate).quotationDate(date).build()
+            );
 
 
         } catch (ParseException | IOException | InterruptedException e) {
@@ -95,54 +93,54 @@ public class CurrencyService {
             String responseBody = response.body();
 
 
-            // return based on response code
-            if(statusCode == 200){
-                // parse the json object
-                JSONParser parser = new JSONParser();
-                JSONObject responseJSONObject = (JSONObject)parser.parse(responseBody);
-
-                // parse rates array
-                JSONArray rates = (JSONArray)responseJSONObject.get("rates");
-
-                double minValue = (Double)((JSONObject)rates.get(0)).get("mid");
-                LocalDate minDate = LocalDate.parse((String)((JSONObject)rates.get(0)).get("effectiveDate"));
-                double maxValue = (Double)((JSONObject)rates.get(0)).get("mid");
-                LocalDate maxDate = LocalDate.parse((String)((JSONObject)rates.get(0)).get("effectiveDate"));
-
-                // iterate through rates list
-                for(int i =0; i <rates.size(); i++){
-                    // get i-th object on list
-                    JSONObject singleRate = (JSONObject)rates.get(i);
-                    double singleRateValue = (Double)singleRate.get("mid");
-
-                    // compare and replace the min and max values (and quotation dates) if necessary
-                    if(singleRateValue < minValue){
-                        minValue = singleRateValue;
-                        minDate = LocalDate.parse((String)singleRate.get("effectiveDate"));
-                    }
-
-                    if(singleRateValue > maxValue){
-                        maxValue = singleRateValue;
-                        maxDate = LocalDate.parse((String)singleRate.get("effectiveDate"));
-                    }
-
-                }
-
-
-                // return the result
-                return Optional.of(
-                        CurrencyMinMaxRate.builder()
-                                .code(currencyCode)
-                                .max(maxValue)
-                                .maxDate(maxDate)
-                                .min(minValue)
-                                .minDate(minDate)
-                                .build()
-                );
-            }else{
-                // in case of any errors return an empty optional
+            // if status code different from 200
+            if(statusCode != 200){
                 return Optional.empty();
             }
+
+            // parse the json object
+            JSONParser parser = new JSONParser();
+            JSONObject responseJSONObject = (JSONObject)parser.parse(responseBody);
+
+            // parse rates array
+            JSONArray rates = (JSONArray)responseJSONObject.get("rates");
+
+            double minValue = (Double)((JSONObject)rates.get(0)).get("mid");
+            LocalDate minDate = LocalDate.parse((String)((JSONObject)rates.get(0)).get("effectiveDate"));
+            double maxValue = (Double)((JSONObject)rates.get(0)).get("mid");
+            LocalDate maxDate = LocalDate.parse((String)((JSONObject)rates.get(0)).get("effectiveDate"));
+
+            // iterate through rates list
+            for(int i =0; i <rates.size(); i++){
+                // get i-th object on list
+                JSONObject singleRate = (JSONObject)rates.get(i);
+                double singleRateValue = (Double)singleRate.get("mid");
+
+                // compare and replace the min and max values (and quotation dates) if necessary
+                if(singleRateValue < minValue){
+                    minValue = singleRateValue;
+                    minDate = LocalDate.parse((String)singleRate.get("effectiveDate"));
+                }
+
+                if(singleRateValue > maxValue){
+                    maxValue = singleRateValue;
+                    maxDate = LocalDate.parse((String)singleRate.get("effectiveDate"));
+                }
+
+            }
+
+
+            // return the result
+            return Optional.of(
+                    CurrencyMinMaxRate.builder()
+                            .code(currencyCode)
+                            .max(maxValue)
+                            .maxDate(maxDate)
+                            .min(minValue)
+                            .minDate(minDate)
+                            .build()
+            );
+
 
 
         } catch (IOException | InterruptedException |ParseException e) {
@@ -169,53 +167,54 @@ public class CurrencyService {
             int statusCode = response.statusCode();
             String responseBody = response.body();
 
-            if(statusCode == 200){
-                // parse the json object
-                JSONParser parser = new JSONParser();
-                JSONObject responseJSONObject = (JSONObject)parser.parse(responseBody);
-
-                // parse rates array
-                JSONArray rates = (JSONArray)responseJSONObject.get("rates");
-
-                // set inital values for comparing
-                JSONObject firstObject = (JSONObject)rates.get(0);
-
-                double maxDifference = Math.abs((Double)firstObject.get("bid") - (Double)firstObject.get("ask"));
-
-                LocalDate maxDifferenceDate = LocalDate.parse((String)firstObject.get("effectiveDate"));
-
-
-                for(int i =0; i <rates.size(); i++){
-                    // get the i-th quotation
-                    JSONObject singleRate = (JSONObject)rates.get(i);
-
-                    // calculate the difference
-                    double singleRateDifference = Math.abs((Double)singleRate.get("bid") - (Double)singleRate.get("ask"));
-
-                    // compare and replace if necessary
-                    if(singleRateDifference > maxDifference){
-                        maxDifference = singleRateDifference;
-                        maxDifferenceDate = LocalDate.parse((String)singleRate.get("effectiveDate"));
-                    }
-
-
-                }
-
-                // round the value to 4 decimal places (as in NBP api)
-                double roundedMaxDifference = DoubleRounder.round(maxDifference, 4);
-
-                // return the result
-                return Optional.of(
-                        CurrencyMajorBuySellDifference.builder()
-                                .code(currencyCode)
-                                .majorDifference(Double.valueOf(roundedMaxDifference))
-                                .quotationDate(maxDifferenceDate)
-                                .build()
-                );
-            }else{
-                // in case of any errors return an empty optional
+            // if response code is different from 200
+            if(statusCode != 200){
                 return Optional.empty();
             }
+
+            // if response code 200
+            // parse the json object
+            JSONParser parser = new JSONParser();
+            JSONObject responseJSONObject = (JSONObject)parser.parse(responseBody);
+
+            // parse rates array
+            JSONArray rates = (JSONArray)responseJSONObject.get("rates");
+
+            // set inital values for comparing
+            JSONObject firstObject = (JSONObject)rates.get(0);
+
+            double maxDifference = Math.abs((Double)firstObject.get("bid") - (Double)firstObject.get("ask"));
+
+            LocalDate maxDifferenceDate = LocalDate.parse((String)firstObject.get("effectiveDate"));
+
+
+            for(int i =0; i <rates.size(); i++){
+                // get the i-th quotation
+                JSONObject singleRate = (JSONObject)rates.get(i);
+
+                // calculate the difference
+                double singleRateDifference = Math.abs((Double)singleRate.get("bid") - (Double)singleRate.get("ask"));
+
+                // compare and replace if necessary
+                if(singleRateDifference > maxDifference){
+                    maxDifference = singleRateDifference;
+                    maxDifferenceDate = LocalDate.parse((String)singleRate.get("effectiveDate"));
+                }
+
+
+            }
+
+            // round the value to 4 decimal places (as in NBP api)
+            double roundedMaxDifference = DoubleRounder.round(maxDifference, 4);
+
+            // return the result
+            return Optional.of(
+                    CurrencyMajorBuySellDifference.builder()
+                            .code(currencyCode)
+                            .majorDifference(Double.valueOf(roundedMaxDifference))
+                            .quotationDate(maxDifferenceDate)
+                            .build()
+            );
 
         } catch (IOException | InterruptedException | ParseException e) {
             throw new RuntimeException(e);

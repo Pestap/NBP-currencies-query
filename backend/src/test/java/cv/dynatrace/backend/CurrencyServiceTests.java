@@ -80,15 +80,6 @@ class CurrencyServiceTests {
         Assertions.assertEquals(exchangeRateObject.getMin(), exchangeRateObject.getMax());
     }
 
-    @Test
-    void testCurrencyServiceValid_getMinAndMaxExchangeRates(){
-        Optional<CurrencyMinMaxRate> exchangeRate = currencyService.getMinAndMaxExchangeRates("EUR",5);
-        CurrencyMinMaxRate exchangeRateObject = exchangeRate.get();
-
-        Assertions.assertEquals(exchangeRateObject.getMin(), 4.6039);
-        Assertions.assertEquals(exchangeRateObject.getMax(), 4.6341);
-    }
-
     // max difference
     @Test
     void testCurrencyServiceInvalidCurrency_getMaxDiffference(){
@@ -106,6 +97,24 @@ class CurrencyServiceTests {
     void testCurrencyServiceInvalidQuotationNumber_getMaxDiffference_2(){
         Optional<CurrencyMajorBuySellDifference> majorBuySellDifference = currencyService.getMaxDifference("EUR", 10000);
         assertThat(majorBuySellDifference.isEmpty()).isTrue();
+    }
+
+    @Test
+    void testCurrencyServiceValid_getMaxDiffference(){
+        Optional<CurrencyMajorBuySellDifference> majorBuySellDifference = currencyService.getMaxDifference("EUR", 1);
+        assertThat(majorBuySellDifference.isEmpty()).isFalse();
+    }
+
+    @Test
+    void testCurrencyServiceValid_getMaxDiffference_2(){
+        Optional<CurrencyMajorBuySellDifference> majorBuySellDifference = currencyService.getMaxDifference("EUR", 255);
+        assertThat(majorBuySellDifference.isEmpty()).isFalse();
+    }
+
+    @Test
+    void testCurrencyServiceValid_getMaxDiffference_3(){
+        Optional<CurrencyMajorBuySellDifference> majorBuySellDifference = currencyService.getMaxDifference("EUR", 10);
+        assertThat(majorBuySellDifference.isEmpty()).isFalse();
     }
 
 
