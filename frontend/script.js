@@ -17,9 +17,9 @@ function getExchangeRate(event){
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
-            console.log(this.responseText);
+            displayResult(this.responseText);
         }else if (this.readyState === 4 && (this.status === 404 || this.status === 400)){
-            console.log("siam");
+            alert("Something went wrong");
         }
     };
     event.preventDefault();
@@ -38,9 +38,9 @@ function getMinMaxExchangeRate(event){
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
-            console.log(this.responseText);
+            displayResult(this.responseText);
         }else if (this.readyState === 4 && (this.status === 404 || this.status === 400)){
-            console.log("siam");
+            alert("Something went wrong");
         }
     };
     event.preventDefault();
@@ -59,9 +59,10 @@ function getMajorDifference(event){
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
-            console.log(this.responseText);
+            displayResult(this.responseText);
+            
         }else if (this.readyState === 4 && (this.status === 404 || this.status === 400)){
-            console.log("siam");
+            alert("Something went wrong");
         }
     };
     event.preventDefault();
@@ -74,4 +75,19 @@ function getMajorDifference(event){
 
     document.getElementById('currencyCode_majorDifferenceForm').value = "";
     document.getElementById('quotationNumber_majorDifferenceForm').value = "";
+}
+
+function displayResult(jsonString){
+    let jsonObject = JSON.parse(jsonString);
+    let keys = Object.keys(jsonObject);
+
+    // create the string to display
+    var displayString = "";
+    for(let i = 0; i< keys.length; i++){
+
+        displayString += keys[i] + " - " + jsonObject[keys[i]] +"\n"; 
+    }
+
+    alert(displayString);
+
 }
