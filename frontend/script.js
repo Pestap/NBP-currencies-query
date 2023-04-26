@@ -18,8 +18,12 @@ function getExchangeRate(event){
     xhttp.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             displayResult(this.responseText);
-        }else if (this.readyState === 4 && (this.status === 404 || this.status === 400)){
-            alert("Something went wrong");
+        }else if (this.readyState === 4 && this.status === 400){
+            alert("Invalid input format");
+        }else if (this.readyState === 4 && (this.status === 404)){
+            alert("Invalid currency code or no quotation from given date");
+        }else if (this.readyState === 4){
+            alert("Something went wrong")
         }
     };
     event.preventDefault();
@@ -39,8 +43,12 @@ function getMinMaxExchangeRate(event){
     xhttp.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             displayResult(this.responseText);
-        }else if (this.readyState === 4 && (this.status === 404 || this.status === 400)){
-            alert("Something went wrong");
+        }else if (this.readyState === 4 && this.status === 400){
+            alert("Invalid input format");
+        }else if (this.readyState === 4 && (this.status === 404)){
+            alert("Invalid currency code or no quotation from given date");
+        }else if (this.readyState === 4){
+            alert("Something went wrong")
         }
     };
     event.preventDefault();
@@ -60,9 +68,12 @@ function getMajorDifference(event){
     xhttp.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             displayResult(this.responseText);
-            
-        }else if (this.readyState === 4 && (this.status === 404 || this.status === 400)){
-            alert("Something went wrong");
+        }else if (this.readyState === 4 && this.status === 400){
+            alert("Invalid input format");
+        }else if (this.readyState === 4 && (this.status === 404)){
+            alert("Invalid currency code or no quotation from given date");
+        }else if (this.readyState === 4){
+            alert("Something went wrong")
         }
     };
     event.preventDefault();
